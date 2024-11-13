@@ -4,7 +4,7 @@ In a day, nothing matters
 It's the night time that flatters
 In the night, no control
 Through the wall, something breakin'
-Wearin' white as you're walkin'
+Wearin' white  as you're walkin'
 Down the street of my soul
 You take my self, you take my self control
 You got me livin' only for the night

@@ -73,12 +73,14 @@ grid on;
 OnePanelEnergyOUTPUT = sol5_numeric .* Area .* solar_efficiency;
 
 figure; % Crea una nuova finestra per il grafico
-plot(E);
+plot(OnePanelEnergyOUTPUT);
 xlabel('Index');
 ylabel('Energy (E)');
 title('Energy Output (E) Plot');
 grid on;
 
+
+%1turbineoutput...working on this
 
 
 

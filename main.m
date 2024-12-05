@@ -22,12 +22,19 @@ solar_wind_data = readtable('solar_and_wind_data_hxh.csv', 'PreserveVariableName
 solar_wind_data = solar_wind_data(1:8784, 1:7);
 
 % Solar efficiency and panel area
-solar_efficiency = 0.197;
-panel_area = 2.80;
+solar_efficiency = 0.197*0.96; %cell+inverter
+panel_area = 2.80; %m2
 
 % Extract numerical values for solar and wind data
 solar_data5 = double(solar_wind_data{:,5}) / 1000;  % Solar irradiance was in Wh now is in kWh
 wind_data7 = double(solar_wind_data{:,7});
+
+%wind accounting for roughness
+h1 = 50; h2 = 140; z0 = 1.6;
+wind_data7 = wind_data7 .* (log(h2 / z0) / log(h1 / z0)); 
+
+
+
 
 %% Energy output single panel
 solar_output_matrix = solar_data5 .* panel_area .* solar_efficiency;
@@ -35,6 +42,8 @@ total_solar_output = sum(solar_output_matrix);
 disp(['Total energy for one PV (2.80m²) in a year: ', num2str(total_solar_output), ' kWh']);
 
 %%  energy output for one wind turbine
+
+
 energy_per_hour = zeros(length(wind_data7), 1); % Preallocate energy vector
 
 for i = 1:length(wind_data7)

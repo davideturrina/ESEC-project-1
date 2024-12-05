@@ -23,7 +23,7 @@ solar_wind_data = readtable('solar_and_wind_data_hxh.csv', 'PreserveVariableName
 solar_wind_data = double(table2array(solar_wind_data(1:8784, 1:7)));
     
 % Solar efficiency and panel area
-solar_efficiency = 0.197*0.96; %cell+inverter
+solar_efficiency = 0.197*0.96;              %cell+inverter
 panel_area = 2.80; %m2
 solar_data5 = solar_wind_data(:, 5) / 1000;                 % Solar irradiance was in Wh, now is in kWh
 
@@ -31,10 +31,8 @@ solar_data5(solar_wind_data(:,6) > 80) = 0;                 %accounnting for sha
 
 
 % Extract numerical values for solar and wind data
-
 wind_data7 = solar_wind_data(:,7);
-
-%wind accounting for roughness
+%accounting for roughness
 h1 = 50; h2 = 140; z0 = 1.6;
 wind_data7 = wind_data7 .* (log(h2 / z0) / log(h1 / z0)); 
 

@@ -38,16 +38,16 @@ wind_data7 = wind_data7 .* (log(h2 / z0) / log(h1 / z0));
 
 
 %% Energy output single panel
-solar_output_matrix = solar_data5 .* panel_area .* solar_efficiency;
-total_solar_output = sum(solar_output_matrix);
+one_solar_energy_per_hour = solar_data5 .* panel_area .* solar_efficiency;
+total_solar_output = sum(one_solar_energy_per_hour);
 disp(['Total energy for one PV (2.80m²) in a year: ', num2str(total_solar_output), ' kWh']);
 
 %% Energy output single turbine (with interpolation )
  wind_speeds = wind_powercurve(:,1); 
  power_output = wind_powercurve(:,2); 
  interpolated_power = interp1(wind_speeds, power_output, wind_data7, 'linear', 'extrap');
- energy_per_hour = interpolated_power; 
- one_turbine_total_energy = sum(energy_per_hour);
+ one_wind_energy_per_hour = interpolated_power; 
+ one_turbine_total_energy = sum(one_wind_energy_per_hour);
  disp(['Total energy produce for one turbine (w\ interpol): ', num2str(one_turbine_total_energy), ' kWh']);
 
 
@@ -73,13 +73,13 @@ grid on;
 time = 1:height(solar_wind_data); 
 figure;
 yyaxis left;
-plot(time, solar_wind_data(:,5), 'DisplayName', 'Solar Data', 'LineWidth', 1.5);
-ylabel('Solar Power (kW)');
-ylim([0 max(solar_wind_data(:,5))*1.1]); 
+plot(time, one_solar_energy_per_hour, 'DisplayName', 'Solar Data', 'LineWidth', 1.5);
+ylabel('Solar Power (kWh)');
+ylim([0 max(one_solar_energy_per_hour)*1.1]); 
 yyaxis right;
-plot(time, solar_wind_data(:,7), 'DisplayName', 'Wind Data', 'LineWidth', 1.5);
-ylabel('Wind Power (kW)');
-ylim([0 max(solar_wind_data(:,7))*1.1]); 
+plot(time,  one_wind_energy_per_hour, 'DisplayName', 'Wind Data', 'LineWidth', 1.5);
+ylabel('Wind Power (kWh)');
+ylim([0 max(one_wind_energy_per_hour)*1.1]); 
 xlabel('Time (hours)');
 title('Solar and Wind Power Data');
 legend('Solar Power', 'Wind Power');

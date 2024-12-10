@@ -45,8 +45,7 @@ disp(['Total energy for one PV (2.80m²) in a year: ', num2str(one_panel_total_e
 %% Energy output single turbine (with interpolation )
  wind_speeds = wind_powercurve(:,1); 
  power_output = wind_powercurve(:,2); 
- interpolated_power = interp1(wind_speeds, power_output, wind_data_input, 'linear', 'extrap');
- one_wind_energy_per_hour = interpolated_power; 
+ one_wind_energy_per_hour = interp1(wind_speeds, power_output, wind_data_input, 'linear', 'extrap');
  one_turbine_total_energy = sum(one_wind_energy_per_hour);
  disp(['Total energy produce for one turbine (w\ interpol): ', num2str(one_turbine_total_energy), ' kWh']);
 
@@ -84,6 +83,11 @@ xlabel('Time (hours)');
 title('Solar and Wind Power Data');
 legend('Solar Power', 'Wind Power');
 grid on;
+
+
+%% START OPTIMIZATION %%
+
+
 
 
 

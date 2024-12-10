@@ -31,21 +31,21 @@ solar_data5(solar_wind_data(:,6) > 80) = 0;                 %accounnting for sha
 
 
 % Extract numerical values for solar and wind data
-wind_data7 = solar_wind_data(:,7);
+wind_data_input = solar_wind_data(:,7);
 %accounting for roughness
 h1 = 50; h2 = 140; z0 = 1.6;
-wind_data7 = wind_data7 .* (log(h2 / z0) / log(h1 / z0)); 
+wind_data_input = wind_data_input .* (log(h2 / z0) / log(h1 / z0)); 
 
 
 %% Energy output single panel
 one_solar_energy_per_hour = solar_data5 .* panel_area .* solar_efficiency;
-total_solar_output = sum(one_solar_energy_per_hour);
-disp(['Total energy for one PV (2.80m²) in a year: ', num2str(total_solar_output), ' kWh']);
+one_panel_total_energy = sum(one_solar_energy_per_hour);
+disp(['Total energy for one PV (2.80m²) in a year: ', num2str(one_panel_total_energy), ' kWh']);
 
 %% Energy output single turbine (with interpolation )
  wind_speeds = wind_powercurve(:,1); 
  power_output = wind_powercurve(:,2); 
- interpolated_power = interp1(wind_speeds, power_output, wind_data7, 'linear', 'extrap');
+ interpolated_power = interp1(wind_speeds, power_output, wind_data_input, 'linear', 'extrap');
  one_wind_energy_per_hour = interpolated_power; 
  one_turbine_total_energy = sum(one_wind_energy_per_hour);
  disp(['Total energy produce for one turbine (w\ interpol): ', num2str(one_turbine_total_energy), ' kWh']);

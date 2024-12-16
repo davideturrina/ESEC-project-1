@@ -21,7 +21,13 @@ max_investment = population * 3000;
 
 demand_per_capita = readtable('demand_data_hxh_8784h.csv', 'PreserveVariableNames', true);
 demand_per_capita = demand_per_capita(1:8784, 1:2);
-total_demand_per_hour = demand_per_capita{:, 2} * population;
+% I hate NaN values
+valid_demand_per_hour = demand_per_capita{:, 2};
+valid_demand_per_hour(isnan(valid_demand_per_hour)) = 0;
+
+
+ 
+total_demand_per_hour = valid_demand_per_hour * population;
 
 % Load wind turbine power curve data
 % Power in kW is stored in the second column
@@ -30,6 +36,8 @@ wind_power_curve = wind_power_curve(:, 1:2);
 
 % Load solar and wind data for each hour
 solar_wind_data = readtable('solar_and_wind_data_hxh.csv', 'PreserveVariableNames', true);
+original_solar_wind_data = solar_wind_data;
+
 solar_wind_data = double(table2array(solar_wind_data(1:8784, 1:7)));
 
 %% SOLAR PANEL CALCULATIONS
@@ -69,10 +77,10 @@ one_nuclear_power_per_hour = repmat(nuclear_power, 8784, 1);
 best_chp_usage = inf;               %inizializzazione del chp usage vector
 best_solution = [0, 0, 0, 0];       %inizializzazione dell' optimum vector
 
-for n_pv = 402228:1:402231    %% after 5-6 calculation , I shortened the three ranges to speed up the final optimum computation
-    for n_wind = 70:1:71
+for n_pv = 355225:1:355225    %% after 5-6 calculation , I shortened the three ranges to speed up the final optimum computation
+    for n_wind = 75:1:100
         for n_nuclear = 23:1:24
-            for storage_capacity = 1185624:1:1185628
+            for storage_capacity = 1207650:1:1207650
 
                 % Compute CHP usage
                 [total_chp_used, chp_usage_hourly, nuclear_usage_hourly, hydro_usage_hourly] = compute_chp_usage(n_pv, n_wind, n_nuclear, storage_capacity, ...
@@ -86,8 +94,6 @@ for n_pv = 402228:1:402231    %% after 5-6 calculation , I shortened the three r
                     best_chp_usage = total_chp_used;
                     best_solution = [n_pv, n_wind, n_nuclear, storage_capacity];
                     best_chp_usage_hourly = chp_usage_hourly;
-                    best_nuclear_usage_hourly = nuclear_usage_hourly;
-                    best_hydro_usage_hourly = hydro_usage_hourly;
                 end
             end
         end
@@ -149,7 +155,7 @@ grid on;
 
 % Plot energy production from Nuclear and Hydro
 figure;
-plot(1:8784, best_nuclear_usage_hourly, 1:8784, best_hydro_usage_hourly);
+plot(1:8784, n_nuclear*one_nuclear_power_per_hour, 1:8784, hydropower_per_hour);
 title('Hourly Energy Production from Nuclear and Hydro');
 legend('Nuclear Energy', 'Hydro Energy');
 xlabel('Hour');
@@ -157,7 +163,7 @@ ylabel('Energy (kWh)');
 grid on;
 
 % Plot total energy demand and total production
-total_energy_production = n_pv * one_solar_energy_per_hour + n_wind * one_wind_energy_per_hour + best_nuclear_usage_hourly + best_hydro_usage_hourly;
+total_energy_production = n_pv * one_solar_energy_per_hour + n_wind * one_wind_energy_per_hour + n_nuclear*one_nuclear_power_per_hour + hydropower_per_hour;
 figure;
 plot(1:8784, total_demand_per_hour, 1:8784, total_energy_production);
 title('Hourly Total Energy Demand and Production');
@@ -167,7 +173,7 @@ ylabel('Energy (kWh)');
 grid on;
 
 % Combined plot for CHP, PV, Wind, Nuclear, and Hydro usage as stacked layers using stacked bar chart
-stacked_data = [best_nuclear_usage_hourly,best_hydro_usage_hourly, n_pv * one_solar_energy_per_hour, n_wind * one_wind_energy_per_hour,best_chp_usage_hourly,];
+stacked_data = [n_nuclear*one_nuclear_power_per_hour,hydropower_per_hour, n_pv * one_solar_energy_per_hour, n_wind * one_wind_energy_per_hour,best_chp_usage_hourly,];
 
 figure;
 bar(1:8784, stacked_data, 'stacked', 'EdgeColor', 'none');
@@ -241,3 +247,7 @@ function [total_cost, cost_pv, cost_wind, cost_nuclear, cost_storage] = compute_
     % Calculate total cost
     total_cost = cost_pv + cost_wind + cost_nuclear + cost_storage;
 end
+
+
+
+

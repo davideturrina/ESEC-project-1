@@ -228,8 +228,8 @@ grid on;
 % load factor = average load / max load
 
 total_demand_per_hour;
-mean_value = mean(best_chp_usage_hourly);
-max_value = max(best_chp_usage_hourly);
+mean_value = mean(best_chp_usage);
+max_value = max(best_chp_usage);
 
 load_factor = mean_value / max_value;
 
@@ -246,11 +246,11 @@ pie(shares, sources);
 title('Cost Share by Source');
 
 % From https://app.electricitymaps.com/map, Florida values in g/kWh  
-co2nuke = 12; 
-co2sol = 26;
-co2chp = 560;
-co2wind = 11;
-co2hydro = 24;
+co2nuke = 0.012; 
+co2sol = 0.026;
+co2chp = 0.560;
+co2wind = 0.011;
+co2hydro = 0.024;
 
 emissions_hydro = total_hydro * co2hydro;
 emissions_wind = total_wind * co2wind;
@@ -310,9 +310,9 @@ fprintf(fileID, 'Total Emissions: %.2f kg CO2\n', total_emissions);
 
 fprintf(fileID, 'Total CHP used: %.2f kWh\n', best_chp_usage);
 
-fprintf(fileID, 'load_factor: %.2f\n', load_factor);
+fprintf(fileID, 'load_factor for chp: %.2f\n', load_factor);
 
-fprintf(fileID, 'electricity spared: %.2f\n', electricity_spared);
+fprintf(fileID, 'electricity spared in kWh: %.2f\n', electricity_spared);
 fprintf(fileID, 'percentage spared: %.2f\n', percentage_spared);
 
 

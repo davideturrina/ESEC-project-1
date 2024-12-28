@@ -228,8 +228,8 @@ grid on;
 % load factor = average load / max load
 
 total_demand_per_hour;
-mean_value = mean(best_chp_usage);
-max_value = max(best_chp_usage);
+mean_value = mean(best_chp_usage_hourly);
+max_value = max(best_chp_usage_hourly);
 
 load_factor = mean_value / max_value;
 

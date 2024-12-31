@@ -22,6 +22,7 @@ valid_demand_per_hour(isnan(valid_demand_per_hour)) = 0;
 
 total_demand_per_hour = valid_demand_per_hour * population;
 
+total_demand = sum(total_demand_per_hour);
 
 % Load wind turbine power curve data
 % Power in kW is stored in the second column
@@ -128,15 +129,17 @@ total_energy_production = n_nuclear*one_nuclear_power_per_hour+hydropower_per_ho
 
 %% START OF PLOTS AND RESULTS 
 
-%% STACKPILE
+    stacked_data = [n_nuclear*one_nuclear_power_per_hour,hydropower_per_hour, n_pv * one_solar_energy_per_hour, n_wind * one_wind_energy_per_hour,best_chp_usage_hourly,best_storage_usage_hourly];
 
-stacked_data = [n_nuclear*one_nuclear_power_per_hour,hydropower_per_hour, n_pv * one_solar_energy_per_hour, n_wind * one_wind_energy_per_hour,best_chp_usage_hourly,best_storage_usage_hourly];
 % Define the start and end hours for the central week of each month
 months_central_days = [15, 15+7]; % Days for the central week (middle of the month)
 months_start_hours = (0:11) * 30 * 24 + (months_central_days(1) - 1) * 24 + 1; % Start hours for each central week
 months_end_hours = (0:11) * 30 * 24 + (months_central_days(2) - 1) * 24;       % End hours for each central week
 
-% Iterate over each month and create a stacked bar plot
+% Create a figure for the subplots
+figure;
+
+% Iterate over each month and create a subplot for each
 for month = 1:length(months_start_hours)
     % Define start and end hour for the current central week
     start_hour = months_start_hours(month);
@@ -150,13 +153,15 @@ for month = 1:length(months_start_hours)
     % Extract data for the selected central week
     week_data = stacked_data(start_hour:end_hour, :);
 
-    % Create the stacked bar plot
-    figure(month); % Assign unique figure number
+    % Create the subplot
+    subplot(3, 4, month); % Arrange subplots in a 3x4 grid
     bar(1:size(week_data, 1), week_data, 'stacked', 'EdgeColor', 'none');
 
     % Add title, labels, and legend
-    title(['Energy Usage and Production (Central Week of Month ' num2str(month) ')']);
-    legend('Nuclear Energy', 'Hydro Energy', 'PV Energy', 'Wind Energy', 'CHP Usage', 'Storage Usage', 'Location', 'south');
+    title(['Month ' num2str(month)]);
+    if month == 1 % Add legend only for the first subplot
+        legend('Nuclear Energy', 'Hydro Energy', 'PV Energy', 'Wind Energy', 'CHP Usage', 'Storage Usage', 'Location', 'southoutside');
+    end
     xlabel('Hour of the Week');
     ylabel('Energy (kWh)');
     grid on;
@@ -227,9 +232,11 @@ grid on;
 
 % load factor = average load / max load
 
-total_demand_per_hour;
-mean_value = mean(best_chp_usage_hourly);
-max_value = max(best_chp_usage_hourly);
+
+mean_value = best_chp_usage;
+max_value = max(best_chp_usage_hourly)*8784;
+
+
 
 load_factor = mean_value / max_value;
 
@@ -278,11 +285,35 @@ percentage_spared = (electricity_spared / total_energy) * 100;
 
 
 
+
+
+
+%% 3 hours selection
+
+% Define the selected 3-hour period
+start_hour_3h = 4500; % Example: 4500th hour
+end_hour_3h = start_hour_3h + 2; % 3-hour period
+
+% Extract data for the selected period
+generation_pv_3h = n_pv * one_solar_energy_per_hour(start_hour_3h:end_hour_3h);
+generation_wind_3h = n_wind * one_wind_energy_per_hour(start_hour_3h:end_hour_3h);
+generation_nuclear_3h = n_nuclear * one_nuclear_power_per_hour(start_hour_3h:end_hour_3h);
+generation_hydro_3h = hydropower_per_hour(start_hour_3h:end_hour_3h);
+generation_chp_3h = best_chp_usage_hourly(start_hour_3h:end_hour_3h);
+generation_storage_3h = best_storage_usage_hourly(start_hour_3h:end_hour_3h);
+
+total_generation_3h = generation_pv_3h + generation_wind_3h + generation_nuclear_3h + generation_hydro_3h + generation_chp_3h + generation_storage_3h;
+
+demand_3h = total_demand_per_hour(start_hour_3h:end_hour_3h);
+
+
 %% SAVING RESULTS 
 
-% Save optimization results to a file
+% Save results to file
+file_name = 'optimization_results.txt';
+fileID = fopen(file_name, 'a');
+
 current_time = datetime('now', 'Format', 'yyyy-MM-dd HH:mm:ss');
-fileID = fopen('optimization_results.txt', 'a');
 
 fprintf(fileID, '\n----------------------------------------\n');
 fprintf(fileID, 'Results optimization logged on: %s\n', current_time);
@@ -309,14 +340,27 @@ fprintf(fileID, 'Emissions from CHP: %.2f kg CO2\n', emissions_chp);
 fprintf(fileID, 'Total Emissions: %.2f kg CO2\n', total_emissions);
 
 fprintf(fileID, 'Total CHP used: %.2f kWh\n', best_chp_usage);
-
 fprintf(fileID, 'load_factor for chp: %.2f\n', load_factor);
 
 fprintf(fileID, 'electricity spared in kWh: %.2f\n', electricity_spared);
 fprintf(fileID, 'percentage spared: %.2f\n', percentage_spared);
 
+fprintf(fileID, '\n3-hour period: %d to %d\n', start_hour_3h, end_hour_3h);
+for t = 1:length(demand_3h)
+    fprintf(fileID, 'Hour %d:\n', start_hour_3h + t - 1);
+    fprintf(fileID, '  PV Generation: %.2f kWh\n', generation_pv_3h(t));
+    fprintf(fileID, '  Wind Generation: %.2f kWh\n', generation_wind_3h(t));
+    fprintf(fileID, '  Nuclear Generation: %.2f kWh\n', generation_nuclear_3h(t));
+    fprintf(fileID, '  Hydro Generation: %.2f kWh\n', generation_hydro_3h(t));
+    fprintf(fileID, '  CHP Generation: %.2f kWh\n', generation_chp_3h(t));
+    fprintf(fileID, '  Storage Usage: %.2f kWh\n', generation_storage_3h(t));
+    fprintf(fileID, '  Total Generation: %.2f kWh\n', total_generation_3h(t));
+    fprintf(fileID, '  Demand: %.2f kWh\n', demand_3h(t));
+end
 
 fclose(fileID);
+
+fprintf('Results saved to %s\n', file_name);
 
 
 %% FUNCTION DEFINITIONS

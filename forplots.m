@@ -307,6 +307,34 @@ total_generation_3h = generation_pv_3h + generation_wind_3h + generation_nuclear
 demand_3h = total_demand_per_hour(start_hour_3h:end_hour_3h);
 
 
+%% TOTAL DEMAND PER HOUR PLOT 12 01 25
+% Supponiamo che total_demand_per_hour sia il vettore con i dati
+% Filtra i dati eliminando i valori pari a zero
+hours = 1:length(total_demand_per_hour);
+valid_indices = total_demand_per_hour > 0; % Indici dei valori validi
+filtered_hours = hours(valid_indices);
+filtered_demand = total_demand_per_hour(valid_indices);
+
+% Creazione di una colormap in base ai valori della domanda
+cmap = parula(length(filtered_demand)); % Usa una colormap graduale (parula, jet, etc.)
+[~, sorted_indices] = sort(filtered_demand); % Ordina i valori per una mappa coerente
+sorted_cmap = cmap(sorted_indices, :);
+
+% Creazione del grafico
+figure;
+scatter(filtered_hours, filtered_demand, 20, filtered_demand, 'filled'); % Usa scatter per colorare i punti
+colormap(parula); % Applica la colormap
+colorbar; % Mostra la barra dei colori per riferimento
+
+% Personalizzazione del grafico
+grid on;
+title('Total Energy Demand Per Hour Over the Year', 'FontSize', 16);
+xlabel('Hour of the Year', 'FontSize', 14);
+ylabel('Total Demand (kWh)', 'FontSize', 14);
+set(gca, 'FontSize', 12);
+
+
+
 %% SAVING RESULTS 
 
 % Save results to file

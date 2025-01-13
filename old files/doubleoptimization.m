@@ -18,7 +18,20 @@ max_investment = population * 3000;
 
 demand_per_capita = readtable('demand_data_hxh_8784h.csv', 'PreserveVariableNames', true);
 demand_per_capita = demand_per_capita(1:8784, 1:2);
-total_demand_per_hour = demand_per_capita{:, 2} * population;
+
+
+% I hate NaN values
+valid_demand_per_hour = demand_per_capita{:, 2};
+valid_demand_per_hour(isnan(valid_demand_per_hour)) = 0;
+
+
+total_demand_per_hour = valid_demand_per_hour * population;
+
+
+
+
+
+
 
 % Wind turbine power curve data (Power in kW: second column)
 wind_power_curve = xlsread('turbine_power_curve_5_MW.xlsx', 'Sheet1', 'B2:E32');
@@ -73,7 +86,7 @@ x0 = [n_pv, n_wind, n_nuclear, storage_capacity]; % Initial guesses
 
 % Bounds for variables
 lb = [0, 0, 0, 0]; % No negative components
-ub = [1e7, 1e3, 100, 1e8]; % Arbitrary high bounds
+ub = [inf, inf , inf , inf]; % Arbitrary high bounds
 
 % Objective function (minimize CHP usage)
 objective = @(x) compute_chp_usage(x(1), x(2), x(3), x(4), solar_energy_per_hour, wind_energy_per_hour, nuclear_power_per_hour, hydropower_per_hour, total_demand_per_hour);
